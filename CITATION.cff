@@ -1,0 +1,29 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: CSC591-HW-LUA
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Rithik
+    family-names: Jain
+    email: rjain25@ncsu.edu
+    name-particle: Rithik
+    orcid: 'https://orcid.org/0009-0007-4322-8370'
+    affiliation: 'NC State, Computer Science, USA'
+  - given-names: Katherine
+    family-names: Mitchell
+  - given-names: Bella
+    family-names: Samuelson
+keywords:
+  - multi-objective
+  - explaination
+  - semi-supervised learning
+  - model-based
+  - Python
+  - learning
+  - ethics
+license:

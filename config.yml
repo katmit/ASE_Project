@@ -1,0 +1,11 @@
+the:
+  dump: false
+  eg: ALL
+  far: 0.95
+  file: ../etc/data/auto93.csv
+  go: true
+  help: false
+  min: 0.5
+  p: 2
+  sample: 512
+  seed: 937162211
