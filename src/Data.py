@@ -283,7 +283,7 @@ class Data:
                     x = row.cells[col.at]
                     if x != '?':
                         n+=1
-                        k = int(self.bin(col, x))
+                        k = self.bin(col, x)
                         if k not in ranges:
                             ranges[k] = Sym(col.at, col.txt) if is_sym else Num(col.at, col.txt)
                         ranges[k].add(x, name)

@@ -372,7 +372,7 @@ def selects(rule, rows):
             hi = range['hi']
             at = range['at']
             x = row.cells[at]
-            if x == '?':
+            if x == '?' or type(x) == str:
                 return True
             float_x = float(x)
             if(lo == hi and lo == float_x) or (lo <= float_x and float_x < hi):
@@ -389,6 +389,8 @@ def selects(rule, rows):
     
     output = []
     for row in rows:
+        # if type(row) == Sym:
+        #     continue;
         if conjunction(row): #todo i am not sure if this is what his LUA code is doing (is it only returning ones where conjuction returns true?)
             output.append(row)
     return output

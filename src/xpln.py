@@ -2,7 +2,7 @@ import yaml
 import Tests
 
 from Utils import cli
-import Repgrid
+import Common
 
 import os
 
@@ -41,7 +41,7 @@ help_string = """USAGE: xpln.py [OPTIONS] [-g ACTION] \n OPTIONS:\n"
       "-b  --bins       initial number of bins           = 16\n"
       "-c  --cliffs     cliff's delta threshold          = 0.147\n"
       "-d  --d          different is over sd*d           = 0.35\n"
-      "-f   --file      name of file                     = ../etc/data/auto93.cs\n"
+      "-f   --file      name of file                     = ../etc/data/auto93.csv\n"
       "-F   --Far       distance to \"faraway\"          = .95\n"
       "-g  --go         start-up action                  = run all tests\n"
       "-h  --help       show help                        = false\n"
@@ -64,6 +64,7 @@ while run_csv:
 
     with open(YAMLFILE, "w") as config_file:
         config_file.write(yaml.dump(new_configs))
+        Common.load() #load any new settings in
 
     if new_configs['the']['help']:
         print(help_string)

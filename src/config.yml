@@ -9,7 +9,7 @@ the:
   dump: false
   eg: ALL
   far: 0.95
-  file: ../etc/data/auto93.csv
+  file: yomomma.csv
   go: true
   help: false
   min: 0.5

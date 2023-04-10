@@ -1,3 +1,4 @@
+import os
 import sys
 import TestEngine
 import Common
@@ -140,42 +141,44 @@ def test_cliffs():
 
     return True
 
-
 @TestEngine.test
 def test_half():
-    data = Data('../etc/data/auto93.csv')
-    half_res = data.half()
-    print(str(len(half_res['left'])) + ", " + str(len(half_res['right'])))
+    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        data = Data('../etc/data/' + source)
+        half_res = data.half()
+        print(str(len(half_res['left'])) + ", " + str(len(half_res['right'])))
 
-    left, right = data.clone(half_res['left']), data.clone(half_res['right'])
-    print(left.stats())
-    print(right.stats())
-    return True #todo (km) check these are correct
+        left, right = data.clone(half_res['left']), data.clone(half_res['right'])
+        print(left.stats())
+        print(right.stats())
+    return True
 
 @TestEngine.test
 def test_sway():
-    data = Data('../etc/data/auto93.csv')
-    sway_res = data.sway()
-    print('all: ' + str(data.stats()))
-    print('best: ' + str(sway_res['best'].stats()))
-    print('rest: ' + str(sway_res['rest'].stats()))
+    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        data = Data('../etc/data/' + source)
+        sway_res = data.sway()
+        print('all: ' + str(data.stats()))
+        print('best: ' + str(sway_res['best'].stats()))
+        print('rest: ' + str(sway_res['rest'].stats()))
     return True
 
 @TestEngine.test
 def test_bin():
-    data = Data('../etc/data/auto93.csv')
-    sway_res = data.sway()
+    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        data = Data('../etc/data/' + source)
+        sway_res = data.sway()
 
-    print('[all] best: ' + str(len(sway_res['best'].rows)) + ', rest: ' + str(len(sway_res['rest'].rows)))
-    b4 = None
-    for bin_res in data.bins(data.cols.x, {'best': sway_res['best'], 'rest': sway_res['rest']}):
-        for range in bin_res:
-            if range.txt != b4:
-                print('')
-            b4 = range.txt
-            has = range.sources.has
-            best_ratio = (has['best'] if 'best' in has else 0) / range.sources.n
-            print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi) + ', ' + str(rnd(best_ratio)) + ', ' + str(range.sources.has))
+        print('[all] best: ' + str(len(sway_res['best'].rows)) + ', rest: ' + str(len(sway_res['rest'].rows)))
+        b4 = None
+        for bin_res in data.bins(data.cols.x, {'best': sway_res['best'], 'rest': sway_res['rest']}):
+            for range in bin_res:
+                if range.txt != b4:
+                    print('')
+                b4 = range.txt
+                has = range.sources.has
+                best_ratio = (has['best'] if 'best' in has else 0) / range.sources.n
+                print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi) + ', ' + str(rnd(best_ratio)) + ', ' + str(range.sources.has))
 
     return True
 
@@ -195,25 +198,28 @@ def test_resrvoir_sampling():
 
 @TestEngine.test
 def test_xpln():
-    data = Data('../etc/data/auto93.csv')
-    sway_res = data.sway()
-    xpln_res = data.xpln({'best': sway_res['best'], 'rest': sway_res['rest']})
+    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        data = Data('../etc/data/' + source)
+        sway_res = data.sway()
+        xpln_res = data.xpln({'best': sway_res['best'], 'rest': sway_res['rest']})
 
-    print('\n-----------\n')
-    if xpln_res['rule'] != None:
-        rule = xpln_res['rule']
-        print('explain=' + str(show_rule(rule)))
+        print('\n-----------\n')
+        if xpln_res['rule'] != None:
+            rule = xpln_res['rule']
+            print('explain=' + str(show_rule(rule)))
 
-        print('all               ' + str(data.stats("mid")) + ', ' + str(data.stats("div")))
+            print('all               ' + str(data.stats("mid")) + ', ' + str(data.stats("div")))
 
-        #TODO check if this is what we're actually supposed to do:
-        data1 = data.clone(selects(rule, data.rows))
-        print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
-        print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
+            #TODO check if this is what we're actually supposed to do:
+            data1 = data.clone(selects(rule, data.rows))
+            print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
+            print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
 
-        top = data.betters(len(sway_res['best'].rows))
-        top_data = data.clone(top[0])
-        print('sort with ' + str(len(data.rows)) + ' evals   ' + str(top_data.stats("mid")) + ', ' + str(top_data.stats("div")))
+            top = data.betters(len(sway_res['best'].rows))
+            top_data = data.clone(top[0])
+            print('sort with ' + str(len(data.rows)) + ' evals   ' + str(top_data.stats("mid")) + ', ' + str(top_data.stats("div")))
+
+        print('\n-----------\n')
         
 
     return True
