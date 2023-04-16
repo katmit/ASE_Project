@@ -22,50 +22,55 @@ for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data'))
 
     # run every dataset for 20 runs
     for x in range(20):
+        print("ROUND 1:\n")
 
-            data = Data('../etc/data/' + source)
+        data = Data('../etc/data/' + source)
 
-            results["all"].append(data)
+        results["all"].append(data)
 
-            rule = None
-            while rule == None:
-                best, rest, _ = data.sway() #discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
+        rule = None
+        while rule == None:
+            best, rest, evals = data.sway() #discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
 
-                # get xpln results
-                rule, _ = data.xpln({'best': best, 'rest': rest})
-
-
-            data1 = data.clone(selects(rule, data.rows))
-            ##print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
-            ##print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
+            # get xpln results
+            rule, _ = data.xpln({'best': best, 'rest': rest})
 
 
-
-            results["sway1"].append(best)
-            results["xpln1"].append(data1)
-
-            top = data.betters(len(best.rows))   #what is top is it just for sway or use both sway1 and sway2
-            top_data = data.clone(top[0])
-
-            results["top"].append(top_data)
+        data1 = data.clone(selects(rule, data.rows))
+        print('sway with ' + str(evals) + ' evals ' + str(best.stats("mid")) + ', ' + str(best.stats("div")))
+        print('xpln on ' + str(evals) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
 
 
 
-            # SWAY2 + XPLN2
+        results["sway1"].append(best)
+        results["xpln1"].append(data1)
 
-            rule = None
-            while rule == None:
-                best, rest, _ = data.sway2()  # discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
+        top = data.betters(len(best.rows))   #what is top is it just for sway or use both sway1 and sway2
+        top_data = data.clone(top[0])
 
-                # get xpln results
-                rule, _ = data.xpln2({'best': best, 'rest': rest})
+        results["top"].append(top_data)
 
-            data1 = data.clone(selects(rule, data.rows))
-            ##print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
-            ##print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
 
-            results["sway2"].append(best)
-            results["xpln2"].append(data1)
+
+        # # SWAY2 + XPLN2
+        #
+        # rule = None
+        # while rule == None:
+        #     best, rest, _ = data.sway2()  # discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
+        #
+        #     # get xpln results
+        #     rule, _ = data.xpln2({'best': best, 'rest': rest})
+        #
+        # data1 = data.clone(selects(rule, data.rows))
+        # print('sway with ' + str(evals) + ' evals ' + str(best.stats("mid")) + ', ' + str(best.stats("div")))
+        # print('xpln on ' + str(evals) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
+        #
+        #
+        # results["sway2"].append(best)
+        # results["xpln2"].append(data1)
+
+
+        print("---------------------------------------------------\n\n\n")
 
 
 
