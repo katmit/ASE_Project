@@ -1,185 +1,85 @@
+import os
+import sys
+import TestEngine
+import Common
+import Repgrid
 
-data_sets = {"auto2.csv","auto93.csv","","","",""}
-functs = {"all", "sway1", xpln1, sway2, xpln2, top} #what is top?
+from Data import Data
+from Num import Num
+from Sym import Sym
+from Row import Row
+from Cols import Cols
+from Utils import rnd, canPrint, rand, set_seed, read_csv, cliffs_delta, selects, Rule, show_rule
 
-for data_set in data_sets:
-    arr_results = {}
 
+# discord chat ta said we need to use stats method to show better/equal/worse of sway1 vs sway2
 
+results = {"all": [], "sway1": [], "xpln1": [], "sway2": [], "xpln2": [], "top": []}
 
-
+for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
 
     data = None
 
+    # run every dataset for 20 runs
     for x in range(20):
 
-        data = Data(Common.config["file"])
-
-        result = generate_stats(data_set)
-        arr_results.append(result)
-
-
-
-def generate_stats(data_set):
-    results = {}
-
-    print("\t\t\t" + data_set.getfirstlinelbls + "\n")
-
-    for f in functs:
-        result = f(data_set)
-        print(f + "\t\t" + result + "\n")
-        results.append(result)
-
-    print("\n")
-    print("\t\t\t" + data_set.getfirstlinelbls + "\n")
-
-    for val in results("all"):
-        for val2 in results("all"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-    for val in results("all"):
-        for val2 in results("sway1"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-    for val in results("all"):
-        for val2 in results("sway2"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-
-    for val in results("sway1"):
-        for val2 in results("sway2"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-    for val in results("sway1"):
-        for val2 in results("xpln1"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-
-    for val in results("sway2"):
-        for val2 in results("xpln2"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-
-    for val in results("sway1"):
-        for val2 in results("top"):
-            if val == val2:
-                print("=\t\t")
-            else:
-                print("!=\t\t")
-
-    print("\n-------------------------------\n")
-
-def run_sway1():
-    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
-        data = Data('../etc/data/' + source)
-        sway_res = data.sway()
-        print('all: ' + str(data.stats()))
-        print('best: ' + str(sway_res['best'].stats()))
-        print('rest: ' + str(sway_res['rest'].stats()))
-
-        return results
-
-
-def run_sway2():
-    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
-        data = Data('../etc/data/' + source)
-        sway_res = data.sway()
-        print('all: ' + str(data.stats()))
-        print('best: ' + str(sway_res['best'].stats()))
-        print('rest: ' + str(sway_res['rest'].stats()))
-
-        return results
-
-
-def run_sway1():
-    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
-        data = Data('../etc/data/' + source)
-        sway_res = data.sway()
-        print('all: ' + str(data.stats()))
-        print('best: ' + str(sway_res['best'].stats()))
-        print('rest: ' + str(sway_res['rest'].stats()))
-
-        return results
-
-def run_xpln1():
-
-        for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
             data = Data('../etc/data/' + source)
-            sway_res = data.sway()
-            xpln_res = data.xpln({'best': sway_res['best'], 'rest': sway_res['rest']})
 
-            print('\n-----------\n')
-            if xpln_res['rule'] != None:
-                rule = xpln_res['rule']
-                print('explain=' + str(show_rule(rule)))
+            results["all"].append(data)
 
-                print('all               ' + str(data.stats("mid")) + ', ' + str(data.stats("div")))
+            rule = None
+            while rule == None:
+                best, rest, _ = data.sway() #discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
 
-                # TODO check if this is what we're actually supposed to do:
-                data1 = data.clone(selects(rule, data.rows))
-                print(
-                    'sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(
-                        sway_res['best'].stats("div")))
-                print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(
-                    data1.stats("div")))
-
-                top = data.betters(len(sway_res['best'].rows))
-                top_data = data.clone(top[0])
-                print('sort with ' + str(len(data.rows)) + ' evals   ' + str(top_data.stats("mid")) + ', ' + str(
-                    top_data.stats("div")))
-
-            print('\n-----------\n')
-
-        return results
+                # get xpln results
+                rule, _ = data.xpln({'best': best, 'rest': rest})
 
 
-def run_xpln2():
-    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
-        data = Data('../etc/data/' + source)
-        sway_res = data.sway()
-        xpln_res = data.xpln({'best': sway_res['best'], 'rest': sway_res['rest']})
-
-        print('\n-----------\n')
-        if xpln_res['rule'] != None:
-            rule = xpln_res['rule']
-            print('explain=' + str(show_rule(rule)))
-
-            print('all               ' + str(data.stats("mid")) + ', ' + str(data.stats("div")))
-
-            # TODO check if this is what we're actually supposed to do:
             data1 = data.clone(selects(rule, data.rows))
-            print(
-                'sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(
-                    sway_res['best'].stats("div")))
-            print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(
-                data1.stats("div")))
+            ##print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
+            ##print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
 
-            top = data.betters(len(sway_res['best'].rows))
+
+
+            results["sway1"].append(best)
+            results["xpln1"].append(data1)
+
+            top = data.betters(len(best.rows))   #what is top is it just for sway or use both sway1 and sway2
             top_data = data.clone(top[0])
-            print('sort with ' + str(len(data.rows)) + ' evals   ' + str(top_data.stats("mid")) + ', ' + str(
-                top_data.stats("div")))
 
-        print('\n-----------\n')
+            results["top"].append(top_data)
 
-    return results
+
+
+            # SWAY2 + XPLN2
+
+            rule = None
+            while rule == None:
+                best, rest, _ = data.sway2()  # discord question mentions best having multiple returns and need to choose best one but don't  just avg bc pareto frontier
+
+                # get xpln results
+                rule, _ = data.xpln2({'best': best, 'rest': rest})
+
+            data1 = data.clone(selects(rule, data.rows))
+            ##print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
+            ##print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
+
+            results["sway2"].append(best)
+            results["xpln2"].append(data1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
