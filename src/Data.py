@@ -135,10 +135,10 @@ class Data:
         if cols is None:
             cols = self.cols.x
 
-        p =  Common.cfg['the']['p']
+        p = 1  # p=1 calculates manhattan distance p=2 means euclidean distance
         for col in cols:
             n += 1
-            d += pow(col.dist(row1.cells[col.at], row2.cells[col.at]), p) #TODO change dist func, dist func for nums and syms are called as well
+            d += pow(col.dist2(row1.cells[col.at], row2.cells[col.at]), p)
 
         return pow(d / n, 1 /  p)
 
