@@ -115,7 +115,9 @@ class Sym():
     def div(self, e = 0):
         e = 0
         for i in self.has:
-            e-= self.has[i] / self.n * math.log(self.has[i] / self.n, 2)
+            p = self.has[i] / self.n
+            e = e - self.has[i] / self.n * (p * math.log(p, 2))
+            # e-= self.has[i] / self.n * math.log(self.has[i] / self.n, 2)
         return e
 
     ##

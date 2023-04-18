@@ -98,8 +98,8 @@ def rand(lo = None, hi = None):
     if not hi:
         hi = 1
 
-    configs['the']['seed'] = (16807 * configs['the']['seed']) % 2147483647
-    return lo + (hi - lo) * configs['the']['seed'] / 2147483647
+    seed = (16807 * Common.cfg['the']['seed']) % 2147483647
+    return lo + (hi - lo) * seed / 2147483647
 
 def get_rand_items(list, item_count: int):
     return random.sample(list, item_count)
@@ -347,7 +347,7 @@ def merges(ranges0, nSmall, nFar): #ranges0: sorted lists of ranges (nums)
 # function sets the value of seed to x.
 ##
 def set_seed(x):
-    configs['the']['seed'] = x
+    Common.cfg['the']['seed'] = x
 
 # A query that returns the score a distribution of symbols inside a SYM.
 # Sorts the ranges (has) by how well the select for <best> using 
@@ -372,7 +372,7 @@ def selects(rule, rows):
             hi = range['hi']
             at = range['at']
             x = row.cells[at]
-            if x == '?' or type(x) == str:
+            if x == '?' or not x.isdigit():
                 return True
             float_x = float(x)
             if(lo == hi and lo == float_x) or (lo <= float_x and float_x < hi):
@@ -443,8 +443,9 @@ def prune(rule, maxSizes):
     if n > 0:
         return rule
     
-def first_N(sortedRangeItems, scoreFunction):
-    print('\n')
+def first_N(sortedRangeItems, scoreFunction, print_output = True):
+    if print_output:
+        print('\n')
 
     first = sortedRangeItems[0]['val']
     def useful(item):
@@ -455,14 +456,16 @@ def first_N(sortedRangeItems, scoreFunction):
     #iterate through sortedRanges, print each and determine which are "useful"
     useful_range_items = []
     for item in sortedRangeItems:
-        print(item['range'].txt + ', ' + str(item['range'].lo) + ', ' + str(item['range'].hi) + ', ' +  str(rnd(item['val'])) + ', ' + str(item['range'].sources.has))
+        if print_output:
+            print(item['range'].txt + ', ' + str(item['range'].lo) + ', ' + str(item['range'].hi) + ', ' +  str(rnd(item['val'])) + ', ' + str(item['range'].sources.has))
         if useful(item):
             useful_range_items.append(item['range'])
     
     most = -1
     out_rule = None
 
-    print('\n')
+    if print_output:
+        print('\n')
 
     for n in range(len(useful_range_items)):
         subset = useful_range_items[0:(n + 1)]

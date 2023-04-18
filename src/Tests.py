@@ -3,7 +3,7 @@ import sys
 import TestEngine
 import Common
 import Repgrid
-
+import random
 from Data import Data
 from Num import Num
 from Sym import Sym
@@ -143,32 +143,40 @@ def test_cliffs():
 
 @TestEngine.test
 def test_half():
+    print('-----------------------------TESTING HALF-----------------------------')
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
         data = Data('../etc/data/' + source)
         half_res = data.half()
+
+        print('\n-----' + source + '------\n')
         print(str(len(half_res['left'])) + ", " + str(len(half_res['right'])))
 
         left, right = data.clone(half_res['left']), data.clone(half_res['right'])
         print(left.stats())
         print(right.stats())
+        print('\n-----------\n')
     return True
 
 @TestEngine.test
 def test_sway():
+    print('-----------------------------TESTING SWAY-----------------------------')
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
         data = Data('../etc/data/' + source)
         sway_res = data.sway()
+        print('\n-----' + source + '------\n')
         print('all: ' + str(data.stats()))
         print('best: ' + str(sway_res['best'].stats()))
         print('rest: ' + str(sway_res['rest'].stats()))
+        print('\n-----------\n')
     return True
 
 @TestEngine.test
 def test_bin():
+    print('-----------------------------TESTING BIN-----------------------------')
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
         data = Data('../etc/data/' + source)
         sway_res = data.sway()
-
+        print('\n-----' + source + '------\n')
         print('[all] best: ' + str(len(sway_res['best'].rows)) + ', rest: ' + str(len(sway_res['rest'].rows)))
         b4 = None
         for bin_res in data.bins(data.cols.x, {'best': sway_res['best'], 'rest': sway_res['rest']}):
@@ -179,6 +187,7 @@ def test_bin():
                 has = range.sources.has
                 best_ratio = (has['best'] if 'best' in has else 0) / range.sources.n
                 print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi) + ', ' + str(rnd(best_ratio)) + ', ' + str(range.sources.has))
+        print('\n-----------\n')
 
     return True
 
@@ -198,19 +207,19 @@ def test_resrvoir_sampling():
 
 @TestEngine.test
 def test_xpln():
+    print('-----------------------------TESTING XPLN-----------------------------')
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
         data = Data('../etc/data/' + source)
         sway_res = data.sway()
         xpln_res = data.xpln({'best': sway_res['best'], 'rest': sway_res['rest']})
 
-        print('\n-----------\n')
+        print('\n-----' + source + '------\n')
         if xpln_res['rule'] != None:
             rule = xpln_res['rule']
             print('explain=' + str(show_rule(rule)))
 
             print('all               ' + str(data.stats("mid")) + ', ' + str(data.stats("div")))
 
-            #TODO check if this is what we're actually supposed to do:
             data1 = data.clone(selects(rule, data.rows))
             print('sway with ' + str(sway_res['evals']) + ' evals ' + str(sway_res['best'].stats("mid")) + ', ' + str(sway_res['best'].stats("div")))
             print('xpln on ' + str(sway_res['evals']) + ' evals   ' + str(data1.stats("mid")) + ', ' + str(data1.stats("div")))
@@ -223,7 +232,51 @@ def test_xpln():
         
 
     return True
-    
+
+def condense_rows(rows):
+    #todo(km): some kind of weighted loss function
+    x = 1
+
+
+#show the mean results over 20 repeated runs (with different random number seeds)
+@TestEngine.test
+def compare_methods():
+
+    seeds = [937162211]
+    for i in range(19):
+        seeds.append(random.randrange(0, 937162211))
+
+    for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        data = Data('../etc/data/' + source)
+
+        # ALL VALUES 
+        vars = ''.ljust(20)
+        means = 'all'.ljust(20)
+        for y in data.cols.y:
+            vars+= y.txt.ljust(20)
+            means+= str(rnd(y.mid())).ljust(20)
+        print(vars)
+        print(means)
+        
+        i = 0
+        while i < 20: #do 20 runs, skipping invalid rule generations
+            
+            set_seed(seeds[i])
+            sway_res = data.sway()
+
+            best = sway_res['best']
+            rest = sway_res['rest']
+            random_rest = random.sample(rest.rows, 3 * len(best.rows))
+            xpln_res = data.xpln({'best': best, 'rest': rest.clone(random_rest)}, False)
+            if(xpln_res['rule'] != None):
+                data1 = data.clone(selects(xpln_res['rule'], data.rows))
+                condensed_row = condense_rows(data1.rows)
+                #todo keep track of our condensed rows
+                i+= 1
+
+        #todo sway1_res = 
+        #todo xpln2_res = 
+        
 
 ##
 # Defines a function ALL using @TestEngine.test. This function calls other
@@ -249,5 +302,7 @@ def ALL():
 # code.
 ##
 if __name__ == "__main__":
-    TestEngine.runs(Common.cfg["the"]["eg"])
+    #TestEngine.runs(Common.cfg["the"]["eg"])
+    TestEngine.runs("test_xpln")
+    #TestEngine.runs("compare_methods")
     sys.exit(Common.fails)
