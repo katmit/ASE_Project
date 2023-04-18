@@ -135,7 +135,7 @@ class Data:
         if cols is None:
             cols = self.cols.x
 
-        p = 1  # p=1 calculates manhattan distance p=2 means euclidean distance
+        p = 1  # p=1 calculates manhattan distance p=2 calculates euclidean distance
         for col in cols:
             n += 1
             d += pow(col.dist2(row1.cells[col.at], row2.cells[col.at]), p)
@@ -445,5 +445,37 @@ class Data:
 
         
         tmp.sort(key = lambda x: x['val'], reverse=True)
+        first_n_res = first_N(tmp, score)
+        return first_n_res
+
+    # Contrast Sets
+    # Collect all the ranges into one flat list and sort them by their `value`.
+    # The same as xpln just that we will pass sway2 results
+    def xpln2(self, sway_res):
+
+        tmp = []
+        max_sizes = {}
+
+        def v(has):
+            return value(has, "best", len(sway_res['best'].rows), len(sway_res['rest'].rows))
+
+        def score(ranges):
+            rule = Rule(ranges, max_sizes)
+            if rule != None:
+                print(str(show_rule(rule)))
+                bestr = selects(rule, sway_res['best'].rows)
+                restr = selects(rule, sway_res['rest'].rows)
+                if len(bestr) + len(restr) > 0:
+                    return {'value': v({'best': len(bestr), 'rest': len(restr)}), 'rule': rule}
+            return None
+
+        for bin_res in self.bins(self.cols.x, sway_res):
+            max_sizes[bin_res[0].txt] = len(bin_res)
+            print('\n')
+            for range in bin_res:
+                print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi))
+                tmp.append({'range': range, 'max': len(bin_res), 'val': v(range.sources.has)})
+
+        tmp.sort(key=lambda x: x['val'], reverse=True)
         first_n_res = first_N(tmp, score)
         return first_n_res
