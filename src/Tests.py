@@ -234,7 +234,7 @@ def test_xpln():
     return True
 
 def condense_rows(rows):
-    #todo(km): some kind of weighted loss function
+    #for now, i'm just going to rank them and spit back the "best" one
     x = 1
 
 
@@ -249,33 +249,45 @@ def compare_methods():
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
         data = Data('../etc/data/' + source)
 
-        # ALL VALUES 
-        vars = ''.ljust(20)
-        means = 'all'.ljust(20)
-        for y in data.cols.y:
-            vars+= y.txt.ljust(20)
-            means+= str(rnd(y.mid())).ljust(20)
-        print(vars)
-        print(means)
-        
-        i = 0
-        while i < 20: #do 20 runs, skipping invalid rule generations
+        output_data = []
+
+        best_count = 0
+        i = 1
+        while i <= 20: #do 20 runs, skipping invalid rule generations
             
-            set_seed(seeds[i])
+            set_seed(seeds[i - 1])
+
+            #sway1
             sway_res = data.sway()
 
             best = sway_res['best']
             rest = sway_res['rest']
             random_rest = random.sample(rest.rows, 3 * len(best.rows))
+
+            #expln1
             xpln_res = data.xpln({'best': best, 'rest': rest.clone(random_rest)}, False)
             if(xpln_res['rule'] != None):
                 data1 = data.clone(selects(xpln_res['rule'], data.rows))
-                condensed_row = condense_rows(data1.rows)
-                #todo keep track of our condensed rows
+                output_data.append(data1)
                 i+= 1
+                best_count += len(best.rows)
 
-        #todo sway1_res = 
-        #todo xpln2_res = 
+            #todo: sway2
+            #todo: xpln2
+
+        best_count/= 20
+
+        # ALL VALUES 
+        vars = ''.ljust(20)
+        means = 'all'.ljust(20)
+        top_n_best = data.betters(int(best_count))
+        for y in data.cols.y:
+            vars+= y.txt.ljust(20)
+            for row in top_n_best:
+                print('hm')
+        # print(vars)
+        # print(means)
+        
         
 
 ##
@@ -303,6 +315,6 @@ def ALL():
 ##
 if __name__ == "__main__":
     #TestEngine.runs(Common.cfg["the"]["eg"])
-    TestEngine.runs("test_xpln")
-    #TestEngine.runs("compare_methods")
+    #TestEngine.runs("test_xpln")
+    TestEngine.runs("compare_methods")
     sys.exit(Common.fails)
