@@ -11,6 +11,7 @@ import yaml
 from pathlib import Path
 
 from Sym import Sym
+from Num import Num
 
 ##
 # Imports call from subprocess, math, yaml and Path from pathlib
@@ -240,32 +241,87 @@ def cli(args, configs):
     configs['the']['rest'] = int(find_arg_value(arg_arr, '-r', '--rest', 4))
     configs['the']['Reuse'] = bool(find_arg_value(arg_arr, '-R', '--Reuse', True))
     configs['the']['seed'] = float(find_arg_value(arg_arr, '-s', '--seed', 937162211))
+    configs['the']['bootstrap'] = float(find_arg_value(arg_arr, '-B', '--bootstrap', 512))
+    configs['the']['conf'] = find_arg_value(arg_arr, '-C', '--conf', 0.05)
+    configs['the']['cohen'] = float(find_arg_value(arg_arr, '-Co', '--cohen', 0.35))
 
     return configs
 
 def many(list, count):
     return random.choices(list, k = int(count))
 
-def cliffs_delta(nsA, nsB):
-    if len(nsA) > 256:
-        nsA = many(nsA, 256)
-    if len(nsB) > 256:
-        nsB = many(nsB, 256)
-    if len(nsA) > 10 * len(nsB):
-        nsA = many(nsA, 10 * len(nsB))
-    if len(nsB) > 10 * len(nsA):
-        nsB = many(nsB, 10 * len(nsA))
+def samples(t, n=0):
+    u = []
+    n = n or len(t)
+    for i in range(n):
+        u.append(t[random.randrange(len(t))])
+
+    return u
+
+def delta(i, other):
+    e, y, z = 1E-32, i, other
+    return abs(y.mid() - z.mid()) / math.pow( (e + math.pow(y.div(), 2)/y.n + math.pow(z.div(), 2)/z.n), 0.5)
+
+
+def cliffs_delta(ns1, ns2):
+    if len(ns1) > 128:
+        ns1 = samples(ns1, 128)
+    if len(ns2) > 128:
+        ns2 = samples(ns2, 128)
 
     n, gt, lt = 0, 0, 0
-    for itemA in nsA:
-        for itemB in nsB:
+    for item1 in ns1:
+        for item2 in ns2:
             n+= 1
-            if itemA > itemB:
+            if item1 > item2:
                 gt+= 1
-            if itemA < itemB:
+            if item1 < item2:
                 lt+= 1
     
-    return (abs(lt - gt) / n) > Common.cfg['the']['cliffs']
+    return (abs(lt - gt) / n) <= Common.cfg['the']['cliffs']
+
+def bootstrap(y0, z0):
+    x = Num() # x will hold all of y0,z0
+    y = Num() # y contains just y0
+    z = Num() # z contains just z0
+
+    for item in y0:
+        y.add(item)
+        x.add(item)
+    for item in z0:
+        z.add(item)
+        x.add(item)
+
+    xmu = x.mid()
+    ymu = y.mid()
+    zmu = z.mid()
+
+    yhat = []
+    zhat = []
+    # yhat and zhat are y,z fiddled to have the same mean
+    for item in y0:
+        yhat.append(item - ymu + xmu)
+    for item in z0:
+        zhat.append(item - zmu + xmu)
+
+    # tobs is some difference seen in the whole space
+    tobs = delta(y, z)
+    n = 0
+    for i in range(int(Common.cfg['the']['bootstrap'])):
+        # here we look at some delta from just part of the space
+        # it the part delta is bigger than the whole, then increment n
+        yhat_samples = samples(yhat)
+        zhat_samples = samples(zhat)
+        yhat_num, zhat_num = Num(), Num()
+        for yhat_sample in yhat_samples:
+            yhat_num.add(yhat_sample)
+        for zhat_sample in zhat_samples:
+            zhat_num.add(zhat_sample)
+        if delta(yhat_num, zhat_num) > tobs:
+            n+=1
+
+    # if we have seen enough n, then we are the same
+    return n / float(Common.cfg['the']['bootstrap']) >= float(Common.cfg['the']['conf'])
 
 
 def merge(col1, col2):# col is a num or a sym
@@ -389,9 +445,7 @@ def selects(rule, rows):
     
     output = []
     for row in rows:
-        # if type(row) == Sym:
-        #     continue;
-        if conjunction(row): #todo i am not sure if this is what his LUA code is doing (is it only returning ones where conjuction returns true?)
+        if conjunction(row):
             output.append(row)
     return output
     

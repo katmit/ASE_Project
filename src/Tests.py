@@ -9,7 +9,7 @@ from Num import Num
 from Sym import Sym
 from Row import Row
 from Cols import Cols
-from Utils import rnd, canPrint, rand, set_seed, read_csv, cliffs_delta, selects, Rule, show_rule
+from Utils import rnd, canPrint, rand, set_seed, read_csv, cliffs_delta, selects, Rule, show_rule, bootstrap
 
 command_line_args = []
 
@@ -233,12 +233,20 @@ def test_xpln():
 
     return True
 
-def condense_rows(rows):
-    #for now, i'm just going to rank them and spit back the "best" one
-    x = 1
+def condense_data(data_list):
+    condensed_output = {}
 
+    condensed_data = Data(data_list[0].cols.names)
+    for data in data_list:
+        for row in data.rows:
+            condensed_data.add(row.cells)
 
-#show the mean results over 20 repeated runs (with different random number seeds)
+    for y in condensed_data.cols.y:
+        condensed_output[y.txt] = y.mid()
+    
+    return condensed_output
+        
+
 @TestEngine.test
 def compare_methods():
 
@@ -247,19 +255,35 @@ def compare_methods():
         seeds.append(random.randrange(0, 937162211))
 
     for source in os.listdir(os.path.join(os.path.dirname(__file__), '../etc/data')):
+        print('\n=================================' + source + '=================================')
         data = Data('../etc/data/' + source)
 
-        output_data = []
+        outputs = {
+            'all': [],
+            'sway1': [],
+            'xpln1': [],
+            # 'sway2': [],
+            # 'xpln2': [],
+            'top': []
+        }
 
-        best_count = 0
+        compare_pairs = [
+            ['all', 'all'],
+            ['all' ,'sway1'],
+            # ['all' ,'sway2'],
+            # ['sway1', 'sway2'],
+            ['sway1', 'xpln1'], 
+            # ['sway2', 'xpln2']:,
+            ['sway1', 'top']
+        ]
+
         i = 1
         while i <= 20: #do 20 runs, skipping invalid rule generations
             
-            set_seed(seeds[i - 1])
+            set_seed(seeds[i - 1]) #use the next random seed
 
             #sway1
             sway_res = data.sway()
-
             best = sway_res['best']
             rest = sway_res['rest']
             random_rest = random.sample(rest.rows, 3 * len(best.rows))
@@ -267,27 +291,57 @@ def compare_methods():
             #expln1
             xpln_res = data.xpln({'best': best, 'rest': rest.clone(random_rest)}, False)
             if(xpln_res['rule'] != None):
-                data1 = data.clone(selects(xpln_res['rule'], data.rows))
-                output_data.append(data1)
-                i+= 1
-                best_count += len(best.rows)
+                outputs['all'].append(data)
+                outputs['sway1'].append(best)
 
+                outputs['xpln1'].append(data.clone(selects(xpln_res['rule'], data.rows)))
+
+                top_n_best = data.betters(len(best.rows))
+                outputs['top'].append(data.clone(top_n_best[0]))
+            
+                i+= 1
+                
             #todo: sway2
             #todo: xpln2
 
-        best_count/= 20
-
-        # ALL VALUES 
-        vars = ''.ljust(20)
-        means = 'all'.ljust(20)
-        top_n_best = data.betters(int(best_count))
+        # print table 1
+        #show the mean results over 20 repeated runs (with different random number seeds)
+        header = ''.ljust(40)
         for y in data.cols.y:
-            vars+= y.txt.ljust(20)
-            for row in top_n_best:
-                print('hm')
-        # print(vars)
-        # print(means)
+            header+= y.txt.ljust(20)
+        print(header)
+        for name, data_list in outputs.items():
+            algorithm_output = name.ljust(40)
+            condensed_data = condense_data(data_list)
+            for _, val in condensed_data.items():
+                algorithm_output+= str(rnd(val, 1)).ljust(20)
+            print(algorithm_output)
         
+        # print table 2
+        # shows the CONJUNCTION of a effect size test and a significance test that compares 20 "all" results to 20 results from some other treatment
+        print('\n' + header)
+        for compare_pair in compare_pairs:
+            compare_output = (compare_pair[0] + ' to ' + compare_pair[1]).ljust(40)
+            results = {}
+            blacklist = []
+            for j in range(20):
+                y_index = 0
+                for y in outputs[compare_pair[0]][j].cols.y:
+                    if y.txt in blacklist:
+                        continue
+                    to_compare = outputs[compare_pair[1]][j].cols.y[y_index]
+                    res = bootstrap(y.has, to_compare.has) and cliffs_delta(y.has, to_compare.has)
+                    if y.txt in results:
+                        results[y.txt] = results[y.txt] and res
+                    else:
+                        results[y.txt] = res
+                    y_index+= 1
+                    if not results[y.txt]:
+                        blacklist.append(y.txt)
+            for key in results:
+                compare_output+= '='.ljust(20) if results[key] else '≠'.ljust(20)
+            print(compare_output)
+
         
 
 ##
