@@ -262,18 +262,18 @@ def compare_methods():
             'all': [],
             'sway1': [],
             'xpln1': [],
-            # 'sway2': [],
-            # 'xpln2': [],
+            'sway2': [],
+            'xpln2': [],
             'top': []
         }
 
         compare_pairs = [
             ['all', 'all'],
             ['all' ,'sway1'],
-            # ['all' ,'sway2'],
-            # ['sway1', 'sway2'],
+            ['all' ,'sway2'],
+            ['sway1', 'sway2'],
             ['sway1', 'xpln1'], 
-            # ['sway2', 'xpln2']:,
+            ['sway2', 'xpln2'],
             ['sway1', 'top']
         ]
 
@@ -281,6 +281,8 @@ def compare_methods():
         while i <= 20: #do 20 runs, skipping invalid rule generations
             
             set_seed(seeds[i - 1]) #use the next random seed
+
+            
 
             #sway1
             sway_res = data.sway()
@@ -298,11 +300,26 @@ def compare_methods():
 
                 top_n_best = data.betters(len(best.rows))
                 outputs['top'].append(data.clone(top_n_best[0]))
-            
-                i+= 1
+            else:
+                continue       
                 
-            #todo: sway2
-            #todo: xpln2
+   
+            #sway2
+            sway_res = data.sway2()
+            best = sway_res['best']
+            rest = sway_res['rest']
+            random_rest = random.sample(rest.rows, 3 * len(best.rows))
+
+            #expln2
+            xpln_res = data.xpln2({'best': best, 'rest': rest.clone(random_rest)}, False)
+            if(xpln_res['rule'] != None):
+                outputs['sway2'].append(best)
+
+                outputs['xpln2'].append(data.clone(selects(xpln_res['rule'], data.rows)))     
+            else:
+                continue       
+            
+            i+= 1
 
         # print table 1
         #show the mean results over 20 repeated runs (with different random number seeds)
@@ -330,6 +347,8 @@ def compare_methods():
                     if y.txt in blacklist:
                         continue
                     to_compare = outputs[compare_pair[1]][j].cols.y[y_index]
+                    bsres = bootstrap(y.has, to_compare.has)
+                    cdres = cliffs_delta(y.has, to_compare.has)
                     res = bootstrap(y.has, to_compare.has) and cliffs_delta(y.has, to_compare.has)
                     if y.txt in results:
                         results[y.txt] = results[y.txt] and res
@@ -342,7 +361,7 @@ def compare_methods():
                 compare_output+= '='.ljust(20) if results[key] else '≠'.ljust(20)
             print(compare_output)
 
-        
+    return True
 
 ##
 # Defines a function ALL using @TestEngine.test. This function calls other

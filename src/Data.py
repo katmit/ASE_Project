@@ -138,7 +138,7 @@ class Data:
         p = 1  # p=1 calculates manhattan distance p=2 calculates euclidean distance
         for col in cols:
             n += 1
-            d += pow(col.dist2(row1.cells[col.at], row2.cells[col.at]), p)
+            d += pow(col.dist(row1.cells[col.at], row2.cells[col.at]), p)
 
         return pow(d / n, 1 /  p)
 
@@ -303,11 +303,6 @@ class Data:
         }
 
 
-
-
-
-
-    
     def cluster(self,rows = None, cols = None, above = None):
         selected_rows = rows if rows != None else self.rows
         selected_cols = cols if cols != None else self.cols.x
@@ -351,7 +346,7 @@ class Data:
     # Recursively prune the worst half the data. Return the survivors and some sample of the rest. Uses diferent dist function dist2.
     def sway2(self):
 
-        def worker(rows, worse, evals=0, above=None):
+        def worker(rows, worse, evals = 0, above = None):
             if len(rows) <= pow(len(self.rows), Common.cfg['the']['min']):
                 return {'best': rows, 'rest': many(worse, Common.cfg['the']['rest'] * len(rows)), 'evals': evals}
             half_res = self.half2(None, above, rows)
@@ -367,10 +362,9 @@ class Data:
             for row in r:
                 worse.append(row)
             return worker(l, worse, half_res['evals'] + evals, A)
-
+        
         worker_res = worker(self.rows, [])
-        return {'best': self.clone(worker_res['best']), 'rest': self.clone(worker_res['rest']),
-                'evals': worker_res['evals']}
+        return {'best': self.clone(worker_res['best']), 'rest': self.clone(worker_res['rest']), 'evals': worker_res['evals']}
 
     def tree(self, rows = None, cols = None, above = None):
         selected_rows = rows if rows != None else self.rows
@@ -454,7 +448,7 @@ class Data:
     # Contrast Sets
     # Collect all the ranges into one flat list and sort them by their `value`.
     # The same as xpln just that we will pass sway2 results
-    def xpln2(self, sway_res):
+    def xpln2(self, sway_res, print_output = True):
 
         tmp = []
         max_sizes = {}
@@ -465,7 +459,8 @@ class Data:
         def score(ranges):
             rule = Rule(ranges, max_sizes)
             if rule != None:
-                print(str(show_rule(rule)))
+                if print_output:
+                    print(str(show_rule(rule)))
                 bestr = selects(rule, sway_res['best'].rows)
                 restr = selects(rule, sway_res['rest'].rows)
                 if len(bestr) + len(restr) > 0:
@@ -474,11 +469,13 @@ class Data:
 
         for bin_res in self.bins(self.cols.x, sway_res):
             max_sizes[bin_res[0].txt] = len(bin_res)
-            print('\n')
+            if print_output:
+                print('\n')
             for range in bin_res:
-                print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi))
+                if print_output:
+                    print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi))
                 tmp.append({'range': range, 'max': len(bin_res), 'val': v(range.sources.has)})
 
         tmp.sort(key=lambda x: x['val'], reverse=True)
-        first_n_res = first_N(tmp, score)
+        first_n_res = first_N(tmp, score, print_output)
         return first_n_res

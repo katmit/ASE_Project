@@ -247,27 +247,22 @@ def cli(args, configs):
 
     return configs
 
-def many(list, count):
+def many(list, count = -1):
+    if count < 0:
+        count = len(list)
     return random.choices(list, k = int(count))
 
-def samples(t, n=0):
-    u = []
-    n = n or len(t)
-    for i in range(n):
-        u.append(t[random.randrange(len(t))])
-
-    return u
 
 def delta(i, other):
     e, y, z = 1E-32, i, other
-    return abs(y.mid() - z.mid()) / math.pow( (e + math.pow(y.div(), 2)/y.n + math.pow(z.div(), 2)/z.n), 0.5)
+    return abs(y.mid() - z.mid()) / ((e + y.div() ** 2 / y.n + z.div() ** 2 / z.n) ** .5)
 
 
 def cliffs_delta(ns1, ns2):
     if len(ns1) > 128:
-        ns1 = samples(ns1, 128)
+        ns1 = many(list(ns1.keys()), 128)
     if len(ns2) > 128:
-        ns2 = samples(ns2, 128)
+        ns2 = many(list(ns2.keys()), 128)
 
     n, gt, lt = 0, 0, 0
     for item1 in ns1:
@@ -285,12 +280,12 @@ def bootstrap(y0, z0):
     y = Num() # y contains just y0
     z = Num() # z contains just z0
 
-    for item in y0:
-        y.add(item)
-        x.add(item)
-    for item in z0:
-        z.add(item)
-        x.add(item)
+    for y0_val in y0:
+        y.add(y0_val)
+        x.add(y0_val)
+    for z0_val in z0:
+        z.add(z0_val)
+        x.add(z0_val)
 
     xmu = x.mid()
     ymu = y.mid()
@@ -299,19 +294,19 @@ def bootstrap(y0, z0):
     yhat = []
     zhat = []
     # yhat and zhat are y,z fiddled to have the same mean
-    for item in y0:
-        yhat.append(item - ymu + xmu)
-    for item in z0:
-        zhat.append(item - zmu + xmu)
+    for y0_val in y0:
+        yhat.append(y0_val - ymu + xmu)
+    for z0_val in z0:
+        zhat.append(z0_val - zmu + xmu)
 
     # tobs is some difference seen in the whole space
     tobs = delta(y, z)
     n = 0
-    for i in range(int(Common.cfg['the']['bootstrap'])):
+    for _ in range(int(Common.cfg['the']['bootstrap'])):
         # here we look at some delta from just part of the space
         # it the part delta is bigger than the whole, then increment n
-        yhat_samples = samples(yhat)
-        zhat_samples = samples(zhat)
+        yhat_samples = many(yhat)
+        zhat_samples = many(zhat)
         yhat_num, zhat_num = Num(), Num()
         for yhat_sample in yhat_samples:
             yhat_num.add(yhat_sample)
