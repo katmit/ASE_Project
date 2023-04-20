@@ -1,3 +1,17 @@
+##
+# The configuration file config.yml specifies various settings for a program
+#
+# dump: A boolean value that determines whether to dump the results of the program to a file.
+# eg: A string value that specifies which examples to use.
+# far: A float value that sets the threshold for feature selection.
+# file: A string value that specifies the path to the input file.
+# go: A boolean value that determines whether to start the program.
+# help: A boolean value that determines whether to display help information.
+# min: A float value that sets the minimum value for a feature.
+# p: An integer value that sets the value of the p-norm used in distance calculations.
+# sample: An integer value that sets the number of samples to use in the program.
+# seed: An integer value that sets the seed for the random number generator.
+##
 the:
   dump: false
   eg: ALL
