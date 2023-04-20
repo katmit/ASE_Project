@@ -121,6 +121,27 @@ class Data:
 
         return pow(d / n, 1 /  p)
 
+
+
+    ##
+    # Defines a function "dist2" that calculates the distance between two
+    # rows row1 and row2.
+    #
+    # col.dist calculates the distance between two values in a column.
+    # row1.cells[col.at] and row2.cells[col.at] are the values in the
+    # column col of row1 and row2 respectively.
+    ##
+    def dist2(self, row1: Row, row2: Row, cols: Cols = None, n = 0, d = 0):
+        if cols is None:
+            cols = self.cols.x
+
+        p = 1  # p=1 calculates manhattan distance p=2 calculates euclidean distance
+        for col in cols:
+            n += 1
+            d += pow(col.dist2(row1.cells[col.at], row2.cells[col.at]), p)
+
+        return pow(d / n, 1 /  p)
+
     def around(self, rowA: Row, rows = None, cols = None):
         selected_rows = rows if rows != None else self.rows
         def distance(rowB):
@@ -209,6 +230,83 @@ class Data:
                 'evals': evals
                 }
 
+    ##
+    # Returns a tuple of two lists (left and right), two values (A and B)
+    # mid row, mid and a number c.
+    #
+    # Sets the value of rows to self.rows if rows is not provided.
+    # Calculates a sample of rows using the many function, and sets A to
+    # the first element of the sample or the value of above if provided. B
+    # is set to the row from self.around(A, some) that has the largest
+    # distance from A.
+    #
+    # Calculates the value of c as the distance between A and B, and
+    # initializes the lists left and right as empty.
+    #
+    # Sorts the rows by the result of the project function applied to each
+    # row and maps it to a list of dictionaries containing the row and its
+    # corresponding distance from A and B. The function then iterates over
+    # this sorted list, adds each row to either left or right based on its
+    # index, and sets mid to the row in the middle. Uses distance metric dist2.
+    ##
+    def half2(self, cols: Cols = None, above: Row = None, rows=None):
+
+        def gap(r1, r2):
+            return self.dist2(r1, r2, cols)
+
+        def project(row: Row):
+            projection = cos(self.dist2(row, A, cols), self.dist2(row, B, cols), c)
+            row.x = row.x if row.x != None else float(projection['x'])
+            row.y = row.y if row.y != None else float(projection['y'])
+            projection["row"] = row
+            return projection
+
+        # sort by distance from row
+        def around(row, rows):
+            return sorted(rows, key=lambda x: gap(x, row))
+
+        def far(row, rows):
+            around_res = around(row, rows)
+            return around_res[int((len(rows) * Common.cfg['the']['Far']))]
+
+        selected_rows = rows if rows != None else self.rows
+        some = many(selected_rows, Common.cfg['the']['Halves'])
+
+        A = above if (above != None and Common.cfg['the']['Reuse']) else far(
+            selected_rows[int(rand(0, len(selected_rows)))], some)
+
+        B = far(A, some)
+
+        c = gap(A, B)
+
+        sorted_projections = sorted(list(map(project, selected_rows)), key=lambda x: x["x"])
+
+        left = []
+        right = []
+        mid = {}
+        for i, item in enumerate(sorted_projections):
+            if i < len(selected_rows) / 2:
+                left.append(item['row'])
+                mid = item['row']
+            else:
+                right.append(item['row'])
+
+        evals = 1 if above and Common.cfg['the']['Reuse'] else 2
+        return {
+            'left': left,
+            'right': right,
+            'A': A,
+            'B': B,
+            'mid': mid,
+            'c': c,
+            'evals': evals
+        }
+
+
+
+
+
+
     
     def cluster(self,rows = None, cols = None, above = None):
         selected_rows = rows if rows != None else self.rows
@@ -250,8 +348,30 @@ class Data:
         worker_res = worker(self.rows, [])
         return {'best': self.clone(worker_res['best']), 'rest': self.clone(worker_res['rest']), 'evals': worker_res['evals']}
 
-        
-            
+    # Recursively prune the worst half the data. Return the survivors and some sample of the rest. Uses diferent dist function dist2.
+    def sway2(self):
+
+        def worker(rows, worse, evals=0, above=None):
+            if len(rows) <= pow(len(self.rows), Common.cfg['the']['min']):
+                return {'best': rows, 'rest': many(worse, Common.cfg['the']['rest'] * len(rows)), 'evals': evals}
+            half_res = self.half2(None, above, rows)
+            l = half_res['left']
+            r = half_res['right']
+            A = half_res['A']
+            B = half_res['B']
+            if self.better(half_res['B'], half_res['A']):
+                l = half_res['right']
+                r = half_res['left']
+                A = half_res['B']
+                B = half_res['A']
+            for row in r:
+                worse.append(row)
+            return worker(l, worse, half_res['evals'] + evals, A)
+
+        worker_res = worker(self.rows, [])
+        return {'best': self.clone(worker_res['best']), 'rest': self.clone(worker_res['rest']),
+                'evals': worker_res['evals']}
+
     def tree(self, rows = None, cols = None, above = None):
         selected_rows = rows if rows != None else self.rows
 
@@ -325,5 +445,37 @@ class Data:
 
         
         tmp.sort(key = lambda x: x['val'], reverse=True)
+        first_n_res = first_N(tmp, score)
+        return first_n_res
+
+    # Contrast Sets
+    # Collect all the ranges into one flat list and sort them by their `value`.
+    # The same as xpln just that we will pass sway2 results
+    def xpln2(self, sway_res):
+
+        tmp = []
+        max_sizes = {}
+
+        def v(has):
+            return value(has, "best", len(sway_res['best'].rows), len(sway_res['rest'].rows))
+
+        def score(ranges):
+            rule = Rule(ranges, max_sizes)
+            if rule != None:
+                print(str(show_rule(rule)))
+                bestr = selects(rule, sway_res['best'].rows)
+                restr = selects(rule, sway_res['rest'].rows)
+                if len(bestr) + len(restr) > 0:
+                    return {'value': v({'best': len(bestr), 'rest': len(restr)}), 'rule': rule}
+            return None
+
+        for bin_res in self.bins(self.cols.x, sway_res):
+            max_sizes[bin_res[0].txt] = len(bin_res)
+            print('\n')
+            for range in bin_res:
+                print(range.txt + ', ' + str(range.lo) + ', ' + str(range.hi))
+                tmp.append({'range': range, 'max': len(bin_res), 'val': v(range.sources.has)})
+
+        tmp.sort(key=lambda x: x['val'], reverse=True)
         first_n_res = first_N(tmp, score)
         return first_n_res
