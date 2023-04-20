@@ -9,6 +9,7 @@ import os
 SCRIPTDIR = os.path.dirname(__file__)
 YAMLFILE = os.path.join(SCRIPTDIR, 'config.yml')
 
+
 ##
 # Loads a YAML configuration file "config.yml" into a Python dictionary
 # "configs" using the yaml library.
@@ -37,9 +38,12 @@ YAMLFILE = os.path.join(SCRIPTDIR, 'config.yml')
 with open(YAMLFILE, "r") as config_file:
     configs = yaml.safe_load(config_file)
 
-help_string = """USAGE: xpln.py [OPTIONS] [-g ACTION] \n OPTIONS:\n"
+help_string = """USAGE: project.py [OPTIONS] [-g ACTION] \n OPTIONS:\n"
       "-b  --bins       initial number of bins           = 16\n"
       "-c  --cliffs     cliff's delta threshold          = 0.147\n"
+      "-B  --bootstrap  bootstrap value                  = 512\n"
+      "-C  --conf       conf value                       = 0.4\n"
+      "-Co --cohen      coehen value                     = 0.35\n"
       "-d  --d          different is over sd*d           = 0.35\n"
       "-f   --file      name of file                     = ../etc/data/auto93.csv\n"
       "-F   --Far       distance to \"faraway\"          = .95\n"
@@ -54,7 +58,7 @@ help_string = """USAGE: xpln.py [OPTIONS] [-g ACTION] \n OPTIONS:\n"
       "-R  --Reuse      child splits reuse a parent pole = true\n"
       "-q  --quit  exit \n"""
 
-print("xpln.py : multi-goal semi-supervised explanation\nenter -h/--help for help.\n")
+print("project.py : multi-goal semi-supervised explanation\nenter -h/--help for help.\n")
 
 run_csv = True
 
@@ -64,7 +68,6 @@ while run_csv:
 
     with open(YAMLFILE, "w") as config_file:
         config_file.write(yaml.dump(new_configs))
-        Common.load() #load any new settings in
 
     if new_configs['the']['help']:
         print(help_string)

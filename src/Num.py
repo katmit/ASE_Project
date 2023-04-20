@@ -4,10 +4,24 @@ import Common
 
 import numpy
 
-from Utils import rand
 
 import Sym
 
+def random(lo = None, hi = None):
+    """
+    Generates a pseudo-random number using seed.
+    :param lo: Lower limit of generated number
+    :param hi: Higher limit of generated number
+    :return: Pseudo-random number
+    """
+    if not lo:
+        lo = 0
+
+    if not hi:
+        hi = 1
+
+    seed = (16807 * Common.cfg['the']['seed']) % 2147483647
+    return lo + (hi - lo) * seed / 2147483647
 
 ##
 # Import the math class
@@ -95,8 +109,8 @@ class Num():
         if value != '?':
             capacity = Common.cfg['the']['Max']
             if self.n >= capacity:
-                rand_value = rand()
-                random_victim = int(rand(0, len(self.has.keys()))) if rand_value < capacity / self.n else None
+                rand_value = random()
+                random_victim = int(random(0, len(self.has.keys()))) if rand_value < capacity / self.n else None
                 if random_victim != None: # make room
                     key = list(self.has.keys())[random_victim]
                     
@@ -140,6 +154,8 @@ class Num():
     # has been processed till now.
     ##
     def mid(self):  
+        if self.n == 0:
+            return 0
         total_sum = 0
         for key, value in self.has.items():
             total_sum+= key * value
