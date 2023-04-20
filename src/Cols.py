@@ -3,10 +3,7 @@ from Sym import Sym
 
 import Row
 
-import re
-from enum import Enum
-
-
+##
 # Holds summaries of columns
 class Cols:
     ##
@@ -17,7 +14,7 @@ class Cols:
     #
     # If s does not end with the character 'X', it is either appended to
     # the y or x attribute based on whether it ends with [!+-] or not. If
-    # it ends with !, it sets the klass attribute to this NUM or SYM.
+    # it ends with !, it sets the class attribute to this NUM or SYM.
     #
     # names:    A list of all column names in the dataset.
     # all:      A list of all columns, including the skipped ones.
@@ -40,7 +37,6 @@ class Cols:
                     self.y.append(col)
                 else:
                     self.x.append(col)
-            
 
     ##
     # The add method updates the dependent and independent columns with
