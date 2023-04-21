@@ -1,0 +1,163 @@
+=================================auto2.csv=================================
+                                        CityMPG+            HighwayMPG+         Weight-             Class-              average eval count
+all                                     20.4                27.5                3299.5              23.1                0.0
+sway1                                   21.7                28.7                3313.2              25.3                7.3
+xpln1                                   20.4                27.5                3299.5              23.1                7.3
+sway2                                   21.4                28.1                3347.8              27.8                5.0
+xpln2                                   20.2                27.1                3387.1              22.1                5.0
+top                                     21.0                28.2                3260.8              27.1                134.9
+
+                                        CityMPG+            HighwayMPG+         Weight-             Class-
+all to all                              =                   =                   =                   =
+all to sway1                            ≠                   ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠                   ≠
+
+=================================auto93.csv=================================
+                                        Lbs-                Acc+                Mpg+                average eval count
+all                                     4561.4              18.1                10.1                0.0
+sway1                                   3764.2              14.7                20.0                28.2
+xpln1                                   4528.4              15.8                10.1                28.2
+sway2                                   3198.4              15.4                23.2                6.0
+xpln2                                   4297.1              14.6                10.1                6.0
+top                                     4584.1              14.9                10.0                1870.6
+
+                                        Lbs-                Acc+                Mpg+
+all to all                              =                   =                   =
+all to sway1                            ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠
+
+=================================china.csv=================================
+                                        N_effort-           average eval count
+all                                     2883.5              0.0
+sway1                                   11612.5             6.0
+xpln1                                   2512.6              6.0
+sway2                                   11675.6             6.0
+xpln2                                   2804.2              6.0
+top                                     3173.5              499.0
+
+                                        N_effort-
+all to all                              =
+all to sway1                            ≠
+all to sway2                            ≠
+sway1 to sway2                          ≠
+sway1 to xpln1                          ≠
+sway2 to xpln2                          ≠
+sway1 to top                            ≠
+
+=================================coc1000.csv=================================
+                                        LOC+                AEXP-               PLEX-               RISK-               EFFORT-             average eval count
+all                                     1191.3              1.0                 4.0                 6.0                 29819.3             0.0
+sway1                                   1021.4              2.9                 2.8                 8.5                 35565.9             9.9
+xpln1                                   1191.3              1.0                 4.0                 6.0                 29819.3             9.9
+sway2                                   1015.5              3.0                 3.2                 8.6                 39164.4             6.5
+xpln2                                   1095.5              1.0                 4.0                 6.0                 32901.5             6.5
+top                                     1009.6              2.4                 3.2                 6.3                 30130.1             1500.0
+
+                                        LOC+                AEXP-               PLEX-               RISK-               EFFORT-
+all to all                              =                   =                   =                   =                   ≠
+all to sway1                            ≠                   ≠                   ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠                   ≠                   ≠
+
+=================================coc10000.csv=================================
+                                        Loc+                Risk-               Effort-             average eval count
+all                                     1200.1              1.0                 32270.5             0.0
+sway1                                   972.1               11.1                38571.2             12.4
+xpln1                                   1200.1              1.0                 32270.5             12.4
+sway2                                   1026.1              9.4                 38961.3             8.0
+xpln2                                   1158.7              1.0                 24142.9             8.0
+top                                     829.7               2.7                 33347.5             15500.0
+
+                                        Loc+                Risk-               Effort-
+all to all                              =                   =                   =
+all to sway1                            =                   ≠                   ≠
+all to sway2                            =                   ≠                   ≠
+sway1 to sway2                          =                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠
+
+=================================healthCloseIsses12mths0001-hard.csv=================================
+                                        MRE-                ACC+                PRED40+             average eval count
+all                                     74.2                7.3                 0.0                 0.0
+sway1                                   94.5                2.1                 9.2                 8.0
+xpln1                                   74.2                7.3                 0.0                 8.0
+sway2                                   100.0               0.0                 37.4                8.0
+xpln2                                   74.2                7.3                 0.0                 8.0
+top                                     94.5                1.6                 5.6                 10000.0
+
+                                        MRE-                ACC+                PRED40+
+all to all                              =                   =                   ≠
+all to sway1                            ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠
+
+=================================healthCloseIsses12mths0011-easy.csv=================================
+                                        Kloc+               Effort-             Defects-            Months-             average eval count
+all                                     43.8                129.0               1328.9              16.6                0.0
+sway1                                   128.6               1784.4              5374.2              32.4                5.0
+xpln1                                   43.8                129.0               1328.9              16.6                5.0
+sway2                                   143.5               1919.5              5831.9              34.5                5.0
+xpln2                                   43.8                129.0               1328.9              16.6                5.0
+top                                     13.1                56.4                409.8               11.4                93.0
+
+                                        Kloc+               Effort-             Defects-            Months-
+all to all                              =                   =                   =                   =
+all to sway1                            ≠                   ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠                   ≠
+
+=================================nasa93dem.csv=================================
+                                        Kloc+               Effort-             Defects-            Months-             average eval count
+all                                     43.8                129.0               1328.9              16.6                0.0
+sway1                                   152.1               1952.5              6578.6              35.6                5.0
+xpln1                                   43.8                129.0               1328.9              16.6                5.0
+sway2                                   130.5               1434.1              5039.5              31.6                5.0
+xpln2                                   43.8                129.0               1328.9              16.6                5.0
+top                                     13.1                56.0                407.0               11.4                93.0
+
+                                        Kloc+               Effort-             Defects-            Months-
+all to all                              =                   =                   =                   =
+all to sway1                            ≠                   ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠                   ≠
+
+=================================pom.csv=================================
+                                        Cost-               Completion+         Idle-               average eval count
+all                                     330.2               0.8                 0.0                 0.0
+sway1                                   531.7               0.9                 0.1                 8.0
+xpln1                                   330.2               0.8                 0.0                 8.0
+sway2                                   450.9               0.9                 0.1                 8.0
+xpln2                                   330.2               0.8                 0.0                 8.0
+top                                     329.9               0.9                 0.0                 10000.0
+
+                                        Cost-               Completion+         Idle-
+all to all                              =                   =                   =
+all to sway1                            ≠                   ≠                   ≠
+all to sway2                            ≠                   ≠                   ≠
+sway1 to sway2                          ≠                   ≠                   ≠
+sway1 to xpln1                          ≠                   ≠                   ≠
+sway2 to xpln2                          ≠                   ≠                   ≠
+sway1 to top                            ≠                   ≠                   ≠
+!!!!!!  PASS    pare_methods    True
+!!!!!!  PASS    ALL     True

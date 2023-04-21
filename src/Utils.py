@@ -11,6 +11,7 @@ import yaml
 from pathlib import Path
 
 from Sym import Sym
+from Num import Num
 
 ##
 # Imports call from subprocess, math, yaml and Path from pathlib
@@ -98,8 +99,8 @@ def rand(lo = None, hi = None):
     if not hi:
         hi = 1
 
-    configs['the']['seed'] = (16807 * configs['the']['seed']) % 2147483647
-    return lo + (hi - lo) * configs['the']['seed'] / 2147483647
+    seed = (16807 * Common.cfg['the']['seed']) % 2147483647
+    return lo + (hi - lo) * seed / 2147483647
 
 def get_rand_items(list, item_count: int):
     return random.sample(list, item_count)
@@ -240,32 +241,82 @@ def cli(args, configs):
     configs['the']['rest'] = int(find_arg_value(arg_arr, '-r', '--rest', 4))
     configs['the']['Reuse'] = bool(find_arg_value(arg_arr, '-R', '--Reuse', True))
     configs['the']['seed'] = float(find_arg_value(arg_arr, '-s', '--seed', 937162211))
+    configs['the']['bootstrap'] = float(find_arg_value(arg_arr, '-B', '--bootstrap', 512))
+    configs['the']['conf'] = find_arg_value(arg_arr, '-C', '--conf', 0.05)
+    configs['the']['cohen'] = float(find_arg_value(arg_arr, '-Co', '--cohen', 0.35))
 
     return configs
 
-def many(list, count):
+def many(list, count = -1):
+    if count < 0:
+        count = len(list)
     return random.choices(list, k = int(count))
 
-def cliffs_delta(nsA, nsB):
-    if len(nsA) > 256:
-        nsA = many(nsA, 256)
-    if len(nsB) > 256:
-        nsB = many(nsB, 256)
-    if len(nsA) > 10 * len(nsB):
-        nsA = many(nsA, 10 * len(nsB))
-    if len(nsB) > 10 * len(nsA):
-        nsB = many(nsB, 10 * len(nsA))
+
+def delta(i, other):
+    e, y, z = 1E-32, i, other
+    return abs(y.mid() - z.mid()) / ((e + y.div() ** 2 / y.n + z.div() ** 2 / z.n) ** .5)
+
+
+def cliffs_delta(ns1, ns2):
+    if len(ns1) > 128:
+        ns1 = many(list(ns1.keys()), 128)
+    if len(ns2) > 128:
+        ns2 = many(list(ns2.keys()), 128)
 
     n, gt, lt = 0, 0, 0
-    for itemA in nsA:
-        for itemB in nsB:
+    for item1 in ns1:
+        for item2 in ns2:
             n+= 1
-            if itemA > itemB:
+            if item1 > item2:
                 gt+= 1
-            if itemA < itemB:
+            if item1 < item2:
                 lt+= 1
     
-    return (abs(lt - gt) / n) > Common.cfg['the']['cliffs']
+    return (abs(lt - gt) / n) <= Common.cfg['the']['cliffs']
+
+def bootstrap(y0, z0):
+    x = Num() # x will hold all of y0,z0
+    y = Num() # y contains just y0
+    z = Num() # z contains just z0
+
+    for y0_val in y0:
+        y.add(y0_val)
+        x.add(y0_val)
+    for z0_val in z0:
+        z.add(z0_val)
+        x.add(z0_val)
+
+    xmu = x.mid()
+    ymu = y.mid()
+    zmu = z.mid()
+
+    yhat = []
+    zhat = []
+    # yhat and zhat are y,z fiddled to have the same mean
+    for y0_val in y0:
+        yhat.append(y0_val - ymu + xmu)
+    for z0_val in z0:
+        zhat.append(z0_val - zmu + xmu)
+
+    # tobs is some difference seen in the whole space
+    tobs = delta(y, z)
+    n = 0
+    for _ in range(int(Common.cfg['the']['bootstrap'])):
+        # here we look at some delta from just part of the space
+        # it the part delta is bigger than the whole, then increment n
+        yhat_samples = many(yhat)
+        zhat_samples = many(zhat)
+        yhat_num, zhat_num = Num(), Num()
+        for yhat_sample in yhat_samples:
+            yhat_num.add(yhat_sample)
+        for zhat_sample in zhat_samples:
+            zhat_num.add(zhat_sample)
+        if delta(yhat_num, zhat_num) > tobs:
+            n+=1
+
+    # if we have seen enough n, then we are the same
+    return n / float(Common.cfg['the']['bootstrap']) >= float(Common.cfg['the']['conf'])
 
 
 def merge(col1, col2):# col is a num or a sym
@@ -347,7 +398,7 @@ def merges(ranges0, nSmall, nFar): #ranges0: sorted lists of ranges (nums)
 # function sets the value of seed to x.
 ##
 def set_seed(x):
-    configs['the']['seed'] = x
+    Common.cfg['the']['seed'] = x
 
 # A query that returns the score a distribution of symbols inside a SYM.
 # Sorts the ranges (has) by how well the select for <best> using 
@@ -372,7 +423,7 @@ def selects(rule, rows):
             hi = range['hi']
             at = range['at']
             x = row.cells[at]
-            if x == '?' or type(x) == str:
+            if x == '?' or not x.isdigit():
                 return True
             float_x = float(x)
             if(lo == hi and lo == float_x) or (lo <= float_x and float_x < hi):
@@ -389,9 +440,7 @@ def selects(rule, rows):
     
     output = []
     for row in rows:
-        # if type(row) == Sym:
-        #     continue;
-        if conjunction(row): #todo i am not sure if this is what his LUA code is doing (is it only returning ones where conjuction returns true?)
+        if conjunction(row):
             output.append(row)
     return output
     
@@ -443,8 +492,9 @@ def prune(rule, maxSizes):
     if n > 0:
         return rule
     
-def first_N(sortedRangeItems, scoreFunction):
-    print('\n')
+def first_N(sortedRangeItems, scoreFunction, print_output = True):
+    if print_output:
+        print('\n')
 
     first = sortedRangeItems[0]['val']
     def useful(item):
@@ -455,14 +505,16 @@ def first_N(sortedRangeItems, scoreFunction):
     #iterate through sortedRanges, print each and determine which are "useful"
     useful_range_items = []
     for item in sortedRangeItems:
-        print(item['range'].txt + ', ' + str(item['range'].lo) + ', ' + str(item['range'].hi) + ', ' +  str(rnd(item['val'])) + ', ' + str(item['range'].sources.has))
+        if print_output:
+            print(item['range'].txt + ', ' + str(item['range'].lo) + ', ' + str(item['range'].hi) + ', ' +  str(rnd(item['val'])) + ', ' + str(item['range'].sources.has))
         if useful(item):
             useful_range_items.append(item['range'])
     
     most = -1
     out_rule = None
 
-    print('\n')
+    if print_output:
+        print('\n')
 
     for n in range(len(useful_range_items)):
         subset = useful_range_items[0:(n + 1)]
@@ -471,7 +523,7 @@ def first_N(sortedRangeItems, scoreFunction):
             if score_res['value'] > most:
                 out_rule = score_res['rule']
                 most = score_res['value']
-    return {'rule': out_rule, 'most': most}
+    return {'rule': out_rule, 'most': most, 'range_count': len(useful_range_items)}
 
 def show_rule(rule: Rule):
     def pretty(range):

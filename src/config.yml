@@ -4,12 +4,15 @@ the:
   Max: 512
   Reuse: true
   bins: 16.0
+  bootstrap: 512.0
   cliffs: 0.147
+  cohen: 0.35
+  conf: 0.05
   d: 0.35
   dump: false
   eg: ALL
   far: 0.95
-  file: yomomma.csv
+  file: ../etc/data/auto93.csv
   go: true
   help: false
   min: 0.5

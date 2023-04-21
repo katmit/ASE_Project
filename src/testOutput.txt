@@ -1,0 +1,10 @@
+
+=================================auto2.csv=================================
+                                        CityMPG+            HighwayMPG+         Weight-             Class-              
+all                                     20.2                27.1                3387.1              22.1                
+sway1                                   21.8                28.7                3263.5              26.4                
+xpln1                                   20.2                27.1                3387.1              22.1                
+top                                     21.0                28.2                3260.8              27.1                
+
+                                        CityMPG+            HighwayMPG+         Weight-             Class-              
+!!!!!!	CRASH	pare_methods	False
