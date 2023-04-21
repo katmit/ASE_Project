@@ -9,3 +9,5 @@ Semester project for NCSU's Automated Software Engineering class.
 To generate tables, navigate to ```src``` and run ```python Tests.py```
 
 Table output is at ```etc/out/project.out```
+
+The final wrieup can be found [here](https://github.com/katmit/ASE_Project/blob/main/etc/report/report.pdf) at ```etc/report/report.pdf```
