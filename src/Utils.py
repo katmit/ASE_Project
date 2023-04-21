@@ -523,7 +523,7 @@ def first_N(sortedRangeItems, scoreFunction, print_output = True):
             if score_res['value'] > most:
                 out_rule = score_res['rule']
                 most = score_res['value']
-    return {'rule': out_rule, 'most': most}
+    return {'rule': out_rule, 'most': most, 'range_count': len(useful_range_items)}
 
 def show_rule(rule: Rule):
     def pretty(range):
